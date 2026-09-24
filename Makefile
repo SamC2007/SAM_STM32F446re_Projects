@@ -1,13 +1,17 @@
 CC = arm-none-eabi-gcc
 MACH = cortex-m4
 CFLAGS = -c -mcpu=$(MACH) -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -std=gnu11 -Wall
-LDFLAGS = -nostdlib -T stm32_ls.ld -Wl,-Map=final.map
+LDFLAGS = -nostdlib -T StartupCode/stm32_ls.ld -Wl,-Map=final.map
 
 all: BFILES final.elf
 BFILES:
 	mkdir -p BFILES
 
 BFILES/%.o: %.c | BFILES
+	$(CC) $(CFLAGS) $< -o $@
+
+
+BFILES/%.o: StartupCode/%.c | BFILES
 	$(CC) $(CFLAGS) $< -o $@
 
 BFILES/%.o: sources/%.c | BFILES
