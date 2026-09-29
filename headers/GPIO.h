@@ -84,6 +84,6 @@ typedef struct{
 #define AF15 15
 
 void GPIO_Init(GPIOx_Handler_t* GPIO);
-void LED_Toggle(GPIOx_Handler_t* GPIO, uint8_t cmd);
+void OUTPUT_Toggle(GPIOx_Handler_t* GPIO, uint8_t GPIO_PIN, uint8_t cmd);
 
 #endif

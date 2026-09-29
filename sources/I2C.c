@@ -48,13 +48,9 @@ void I2C_Init(I2Cx_Handler_t* I2C){
     }
     I2C->I2Cx->TRISE = (tempreg & 0x3F);
 
-    //DMA Capabilities
-    if(I2C->I2Cx_Config.DMAtx == ENABLE || I2C->I2Cx_Config.DMArx == ENABLE){
-        I2C->I2Cx->CR2 |= (1 << I2C_CR2_DMAEN);
-    }
 }
 
-void I2C_SendMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd){
+void I2C_ControllerSendMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd){
     uint32_t dummy = 0;
     // enable start bit
     I2C->I2Cx->CR1 |= (1 << I2C_CR1_START);
@@ -80,8 +76,7 @@ void I2C_SendMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveA
     (void)dummy;
 }
 
-void I2C_ReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd){
-
+void I2C_ControllerReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd){
     uint32_t dummy = 0;
     // enable start bit
     I2C->I2Cx->CR1 |= (1 << I2C_CR1_START);
@@ -89,21 +84,20 @@ void I2C_ReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t sla
     while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_SB)));
     I2C->I2Cx->DR = (slaveAddr << 1) | 1;
     
+    while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_ADDR)));
     if(len == 1){
-        while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_ADDR)));
+        I2C->I2Cx->CR1 &= ~(1 << I2C_CR1_ACK);
         dummy = I2C->I2Cx->SR1;
         dummy = I2C->I2Cx->SR2;
-
-        I2C->I2Cx->CR1 &= ~(1 << I2C_CR1_ACK);
+        
         while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_RXNE)));
+
         if(cmd == STOP_CONDITION){
             I2C->I2Cx->CR1 |= (1 << I2C_CR1_STOP);
         }
-
         *msg = I2C->I2Cx->DR;
 
     }else {
-        while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_ADDR)));
         dummy = I2C->I2Cx->SR1;
         dummy = I2C->I2Cx->SR2;
 
@@ -126,11 +120,11 @@ void I2C_ReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t sla
     (void)dummy;
 }
 
-uint8_t I2C_SendIT(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr){
+uint8_t I2C_ControllerSendIT(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr){
     // we update communication of the new data only when communication is not in place
-    uint8_t busyState = ((I2C->I2Cx->SR2 >> I2C_SR2_BUSY) & 0x1);
+    uint8_t busyState = I2C->BusyState;
 
-    if(busyState != BUSY_RXNE && busyState != BUSY_TXE){
+    if((busyState != BUSY_TXE) && (busyState != BUSY_RXNE)){
         I2C->TxLen = len;
         I2C->Addr = slaveAddr;
         I2C->TxBuffer = msg;
@@ -146,11 +140,11 @@ uint8_t I2C_SendIT(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slav
 
 }
 
-uint8_t I2C_ReceiveIT(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr){
+uint8_t I2C_ControllerReceiveIT(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr){
  // we update communication of the new data only when communication is not in place
-    uint8_t busyState = ((I2C->I2Cx->SR2 >> I2C_SR2_BUSY) & 0x1);
+    uint8_t busyState = I2C->BusyState;
 
-    if(busyState != BUSY_RXNE && busyState != BUSY_TXE){
+    if((busyState != BUSY_TXE) && (busyState != BUSY_RXNE)){
         I2C->RxLen = len;
         I2C->Addr = slaveAddr;
         I2C->RxBuffer = msg;
@@ -289,6 +283,35 @@ void I2C_ITControl(uint8_t PeriInterrupt, uint8_t cmd){
         }
     }
 }
+
+void I2C_TargetSendMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len){
+    uint32_t dummy = 0;
+    while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_ADDR)));
+    dummy = I2C->I2Cx->SR1;
+    dummy = I2C->I2Cx->SR2;
+
+    while(len > 0){
+        while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_TXE)));
+        I2C->I2Cx->DR = *msg;
+        ++msg;
+        --len;
+    }
+    (void)dummy;
+}
+void I2C_TargetReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len){
+    uint32_t dummy = 0;
+    while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_ADDR)));
+    dummy = I2C->I2Cx->SR1;
+    dummy = I2C->I2Cx->SR2;
+    while(len > 0){
+        while(!(I2C->I2Cx->SR1 & (1 << I2C_SR1_RXNE)));
+        *msg = I2C->I2Cx->DR;
+        ++msg;
+        --len;
+    }
+    (void)dummy;
+}
+
 
 void ManageAck(I2Cx_t* I2C, uint8_t cmd){
     if(cmd == ENABLE){

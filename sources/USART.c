@@ -37,6 +37,16 @@ void USART_PeriClk(USARTx_t* USART, uint8_t cmd){
 
 void USART_Init(USARTx_Handler_t* USART){
     USART_PeriClk(USART->USARTx, ENABLE);
+
+    if(USART->USARTx_Config.USART_MODE == TRANSMIT_ONLY){
+        USART->USARTx->CR1 |= (USART_CR1_TE << USART_CR1_TE);
+    }else if(USART->USARTx_Config.USART_MODE == RECEIVE_ONLY){
+
+        USART->USARTx->CR1 |= (USART_CR1_RE << USART_CR1_RE);
+    }else{
+        USART->USARTx->CR1 |= (USART_CR1_TE << USART_CR1_TE);
+        USART->USARTx->CR1 |= (USART_CR1_RE << USART_CR1_RE);
+    }
     //configure BAUD RATE
     uint32_t clock;
     if(USART->USARTx == USART1 || USART->USARTx == USART6){
@@ -65,15 +75,6 @@ void USART_Init(USARTx_Handler_t* USART){
 
     USART->USARTx->BRR |= (Fraction << USART_DIV_FRACTION);
 
-    if(USART->USARTx_Config.USART_MODE == TRANSMIT_ONLY){
-        USART->USARTx->CR1 |= (USART_CR1_TE << USART_CR1_TE);
-    }else if(USART->USARTx_Config.USART_MODE == RECEIVE_ONLY){
-
-        USART->USARTx->CR1 |= (USART_CR1_RE << USART_CR1_RE);
-    }else{
-        USART->USARTx->CR1 |= (USART_CR1_TE << USART_CR1_TE);
-        USART->USARTx->CR1 |= (USART_CR1_RE << USART_CR1_RE);
-    }
     USART->USARTx->CR1 |= (USART->USARTx_Config.SAMPLING << USART_CR1_OVR8);
 }
 

@@ -25,16 +25,19 @@ void init_print(void){
 	pGPIOA.GPIOx_Config.MODER = ALTERNATE;
 	pGPIOA.GPIOx_Config.AFR = AF7;
     pGPIOA.GPIOx_Config.PUPDR = PULL_UP;
-    pGPIOA.GPIOx_Config.OSPEEDR = MED_SPEED;
+    pGPIOA.GPIOx_Config.OSPEEDR = FAST_SPEED;
     pGPIOA.GPIOx_Config.OT = PUSH_PULL;
-    GPIO_Init(&pGPIOA);
 	//Configure USART
     pUSART2.USARTx = USART2;
     pUSART2.USARTx_Config.BAUD_RATE = 115200;
     pUSART2.USARTx_Config.USART_MODE = TRANSMIT_ONLY;
     pUSART2.USARTx_Config.SAMPLING = OVER8;
+
+    GPIO_Init(&pGPIOA);
+    delay(1);
     USART_Init(&pUSART2);
     USART_Control(USART2, ENABLE);
+    print("\r\n");
 }
 
 void init_tim(void){
@@ -47,8 +50,8 @@ void init_tim(void){
 }
 
 void init_functions(void){
-    init_print();
     init_tim();
+    init_print();
 }
 
 uint8_t len(uint8_t str[]){
@@ -62,6 +65,7 @@ uint8_t len(uint8_t str[]){
 void print(char* ptr){
    USART_Transmit(USART2, (uint8_t*)ptr, len((uint8_t*)ptr));
 }
+
 void printD(uint32_t digit){
 	if(digit == 0){
 		USART_TransmitByte(USART2, '0');
@@ -113,6 +117,7 @@ void printHex(uint8_t n){
 	USART_TransmitByte(USART2, buffer[0]);
 	print("\r\n");
 }
+
 
 
 void delay(uint32_t n){

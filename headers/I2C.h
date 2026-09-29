@@ -12,8 +12,6 @@ typedef struct {
     uint8_t ACK;
     uint8_t I2C_ADDRESS;
     uint8_t DUTY;
-    uint8_t DMAtx;
-    uint8_t DMArx;
 }I2Cx_Config_t;
 
 typedef struct{
@@ -116,8 +114,12 @@ typedef struct {
 
 void I2C_Init(I2Cx_Handler_t* I2C);
 void I2C_Control(I2Cx_t* I2C, uint8_t cmd);
-void I2C_SendMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd);
-void I2C_ReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd);
+
+void I2C_ControllerSendMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd);
+void I2C_ControllerReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr, uint8_t cmd);
+
+void I2C_TargetSendMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len);
+void I2C_TargetReceiveMsg(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len);
 
 uint8_t I2C_SendIT(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr);
 uint8_t I2C_ReceiveIT(I2Cx_Handler_t* I2C, uint8_t* msg, uint32_t len, uint8_t slaveAddr);

@@ -76,11 +76,11 @@ void GPIO_Init(GPIOx_Handler_t* GPIO){
 
 }
 
-void LED_Toggle(GPIOx_Handler_t* GPIO, uint8_t cmd){
+void OUTPUT_Toggle(GPIOx_Handler_t* GPIO, uint8_t GPIO_PIN, uint8_t cmd){
     if(cmd == ENABLE){
-        GPIO->GPIOx->ODR |= (1 << GPIO->GPIOx_Config.PIN);
+        GPIO->GPIOx->ODR |= (1 << GPIO_PIN);
     }else{
-        GPIO->GPIOx->ODR &= ~(1 << GPIO->GPIOx_Config.PIN);
+        GPIO->GPIOx->ODR &= ~(1 << GPIO_PIN);
     }
 
 }
