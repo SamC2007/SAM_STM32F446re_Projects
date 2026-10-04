@@ -36,7 +36,7 @@ int main(void){
 		print("cm\r\n");
 		ready = 0;
 
-        for(volatile uint32_t i = 0; i < 1000000; ++i);
+        delay(10);
 	}
 
 	return 0;
@@ -92,17 +92,13 @@ void init_project(void){
     InterruptBitConfig(TIM2, TIM_DIER_CC1IE, ENABLE);
     UG_Control(TIM2, ENABLE);
 
-    
     GP_TIM_PeriControl(TIM5, ENABLE);
     GP_TIM_PeriControl(TIM2, ENABLE);
 
 }
 
 void TIM2_Handler(void){
-
-	if(CheckStatusFlag(TIM2, TIM_SR_CC1IF)){
-        ResetStatusFlag(TIM2, TIM_SR_CC1IF);
-	}
+   
 	if(rose == 0){
 		time_rise = GetTIM_CCR1Value(TIM2);
         TIM_CCERConfig(TIM2, TIM_CCER_CC1P, ENABLE);
@@ -126,6 +122,9 @@ void TIM2_Handler(void){
 		}
 		rose = 0;
 	}
-	ready = 1;
+	ready = 1; 
+	if(CheckStatusFlag(TIM2, TIM_SR_CC1IF)){
+        ResetStatusFlag(TIM2, TIM_SR_CC1IF);
+	}
 }
 
