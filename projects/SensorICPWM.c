@@ -1,19 +1,15 @@
 #include "headers/stm32fx.h"
-#include "headers/print.h"
 #include "headers/GPIO.h"
-#include "headers/TIM2_TIM5.h"
+#include "headers/TIMERS.h"
 #include "headers/RCC.h"
 
 
 #include <stdint.h>
 
-TIM2_5_TypeDef_INPUT_t volatile* const pTIM2 = TIM2_INPUT;
+GP_TIMx_Handler_t pTIM2;
+GP_TIMx_Handler_t pTIM5;
+GPIOx_Handler_t pGPIOA;
 
-TIM2_5_TypeDef_OUTPUT_t volatile* const pTIM5 = TIM5_OUTPUT;
-
-GPIOx_TypeDef_t volatile* const pGPIOB = GPIOB;
-
-uint32_t volatile* const ISER0 = NVIC_ISER0; 
 uint8_t volatile ready = 0;
 uint32_t volatile time_rise = 0;
 uint32_t volatile time_fall = 0;
@@ -26,12 +22,13 @@ void init_project(void);
 
 int main(void){
 	init_project();
+    print("Initialized\r\n");
 
 	while(1){
 		//output pin for 10 microseconds
-		pGPIOA->ODR.ODR9 = ENABLE;
+        OUTPUT_Toggle(&pGPIOA, 9, ENABLE);
 		for(uint16_t volatile i = 0; i < 160; ++i);
-		pGPIOA->ODR.ODR9 = DISABLE;
+        OUTPUT_Toggle(&pGPIOA, 9, DISABLE);
 
 		while(!(ready));
 		print("Distance in Centimeter: ");
@@ -39,7 +36,7 @@ int main(void){
 		print("cm\r\n");
 		ready = 0;
 
-		for(uint32_t i = 0; i < 1000000; ++i);
+        for(volatile uint32_t i = 0; i < 1000000; ++i);
 	}
 
 	return 0;
@@ -47,81 +44,85 @@ int main(void){
 
 void init_project(void){
 	//initialize RCC for TIM2 
-	init_print();
-	pRCC_APB1ENR->TIM2_EN = ENABLE;
-	pRCC_APB1ENR->TIM5_EN = ENABLE;
+	init_functions();
 
 	//initialie NVIC for TIM2
-	*ISER0 |= NVIC_TIM2;
-
+    GP_TIMInterruptConfig(NVIC_TIM2, ENABLE);
 	//configure GPIOA 0 for Input capture
-	pGPIOA->MODER.MODER0 = DISABLE;
-	pGPIOA->MODER.MODER0 = ALTERNATE;
-	pGPIOA->PUPDR.PUPDR0 = PULL_DOWN;
-	pGPIOA->AFRL.AFRL0 = AF1;
+    pGPIOA.GPIOx = GPIOA;
+	pGPIOA.GPIOx_Config.MODER = ALTERNATE;
+	pGPIOA.GPIOx_Config.PUPDR = PULL_DOWN;
+	pGPIOA.GPIOx_Config.AFR = AF1;
+	pGPIOA.GPIOx_Config.PIN = 0;
+    GPIO_Init(&pGPIOA);
 
 	//configure GPIOA 1 for PWN capture
-	pGPIOA->MODER.MODER1 = DISABLE;
-	pGPIOA->MODER.MODER1 = ALTERNATE;
-	pGPIOA->PUPDR.PUPDR1 = PULL_DOWN;
-	pGPIOA->AFRL.AFRL1 = AF2;
+    pGPIOA.GPIOx_Config.AFR = AF2;
+    pGPIOA.GPIOx_Config.PIN = 1;
+    GPIO_Init(&pGPIOA);
 
 	// Configure GPIOA 9 for Output (sensor)
-	pGPIOA->MODER.MODER9 = DISABLE;
-	pGPIOA->MODER.MODER9 = OUTPUT;
-
-	// Configure GPIOB
+	pGPIOA.GPIOx_Config.MODER = OUTPUT;
+	pGPIOA.GPIOx_Config.PUPDR = PUSH_PULL;
+    pGPIOA.GPIOx_Config.PIN = 9;
+    GPIO_Init(&pGPIOA);
+/*
 	pGPIOB->MODER.MODER9 = DISABLE;
 	pGPIOB->MODER.MODER9 = OUTPUT;
-
+*/
 	//CONFIGURE TIM5
-	pTIM5->ARR = 0;
-	pTIM5->ARR = 999;
-	pTIM5->PSC = 31;
-	pTIM5->CCER.CC2E = ENABLE;
-	pTIM5->CCMR1.OC2M = 6;
-	pTIM5->CCMR1.OC2PE = ENABLE;
-	pTIM5->CCR2 = 499;
-	pTIM5->EGR.UG = ENABLE;
-	pTIM5->CR1.CEN = ENABLE;
+    pTIM5.TIMx = TIM5;
+	pTIM5.TIMx_Config.ARR = 999;
+    pTIM5.TIMx_Config.PSC = 31;
+	pTIM5.TIMx_Config.CHANNEL_MODE = OUTPUT_COMPARE;
+    pTIM5.TIMx_Config.CHANNEL = TIM_CHANNEL_2;
+    pTIM5.TIMx_Config.TI_SELECTION = TIM_OUTPUT;
+    pTIM5.TIMx_Config.OUTPUT_MODE = PWM_MODE1;
+    GP_TIM_Init(&pTIM5);
+    UG_Control(TIM5, ENABLE);
 
+	//CONFIGURE TIM2 channel 1
+    pTIM2.TIMx = TIM2;
+	pTIM2.TIMx_Config.ARR = 65535 - 1;
+    pTIM2.TIMx_Config.PSC = 15;
+    pTIM2.TIMx_Config.CHANNEL = TIM_CHANNEL_1;
+    pTIM2.TIMx_Config.CHANNEL_MODE = INPUT_CAPTURE;
+    pTIM2.TIMx_Config.TI_SELECTION = TIM_INPUT1;
+    GP_TIM_Init(&pTIM2);
+    InterruptBitConfig(TIM2, TIM_DIER_CC1IE, ENABLE);
+    UG_Control(TIM2, ENABLE);
 
-	//CONFIGURE TIM2 
-	pTIM2->CCMR1.CC1S = 1;
-	pTIM2->ARR = 0;
-	pTIM2->ARR = 65535;
-	pTIM2->PSC = 15;
-	pTIM2->CCER.CC1E = ENABLE;
-	pTIM2->DIER.CC1IE = ENABLE;
-	pTIM2->EGR.UG = ENABLE;
-	pTIM2->CR1.CEN = ENABLE;
+    
+    GP_TIM_PeriControl(TIM5, ENABLE);
+    GP_TIM_PeriControl(TIM2, ENABLE);
 
 }
 
 void TIM2_Handler(void){
-	if(pTIM2->SR.CC1IF){
-		if(pTIM2->DIER.CC1IE){
-			pTIM2->SR.CC1IF = 0;
-		}
+
+	if(CheckStatusFlag(TIM2, TIM_SR_CC1IF)){
+        ResetStatusFlag(TIM2, TIM_SR_CC1IF);
 	}
 	if(rose == 0){
-		time_rise = pTIM2->CCR1;
-		pTIM2->CCER.CC1P = 1;
+		time_rise = GetTIM_CCR1Value(TIM2);
+        TIM_CCERConfig(TIM2, TIM_CCER_CC1P, ENABLE);
 		rose = 1;
 	}else{
-		time_fall = pTIM2->CCR1;
-		pTIM2->CCER.CC1P = 0;
+		time_fall = GetTIM_CCR1Value(TIM2);
+        TIM_CCERConfig(TIM2, TIM_CCER_CC1P, DISABLE);
 		
 		if(time_rise <= time_fall){
 			time = time_fall - time_rise;
 		}else {
-			time = ((pTIM2->ARR - time_rise) + time_fall);
+			time = ((GetTIM_ARRValue(TIM2) - time_rise) + time_fall);
 		}
 		distance = ((time * speed) / 2.0f);
+        uint32_t value_ccr = 0;
 		if(distance <= 30.0f){
-			pTIM5->CCR2 = (30 - (uint32_t)distance ) * 30;
+            value_ccr = (30 - (uint32_t)distance ) * 30;
+            SetTIM_CCR2Value(TIM5, value_ccr);
 		}else {
-			pTIM5->CCR2 = 0;
+			SetTIM_CCR2Value(TIM5, value_ccr);
 		}
 		rose = 0;
 	}

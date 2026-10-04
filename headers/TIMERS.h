@@ -59,7 +59,7 @@ typedef struct{
 	uint32_t CR2;
 	uint32_t SMCR;
 	uint32_t DIER;
-	uint32_t R;
+	uint32_t SR;
 	uint32_t EGR;
 	uint32_t CCMR1;
 	uint32_t CCMR2;
@@ -87,7 +87,64 @@ void GPTIM_PeriCLK(GP_TIMx_t* TIM, uint8_t cmd);
 void GP_TIM_Init(GP_TIMx_Handler_t* TIM);
 void CNT_Control(GP_TIMx_t* TIM, uint8_t cmd);
 void UG_Control(GP_TIMx_t* TIM, uint8_t cmd);
+void GP_TIM_PeriControl(GP_TIMx_t* TIM, uint8_t cmd);
+void GP_TIMInterruptConfig(uint8_t NVIC_TIM, uint8_t cmd);
 void SetCCR(GP_TIMx_Handler_t* TIM, uint32_t v);
+void InterruptBitConfig(GP_TIMx_t* TIM, uint8_t IT_BIT, uint8_t cmd);
+void TIM_CCERConfig(GP_TIMx_t* TIM, uint8_t BIT, uint8_t cmd);
+uint8_t CheckStatusFlag(GP_TIMx_t* TIM, uint8_t Flag);
+void ResetStatusFlag(GP_TIMx_t* TIM, uint8_t Flag);
+
+uint32_t GetTIM_ARRValue(GP_TIMx_t* TIM);
+uint32_t GetTIM_CCR1Value(GP_TIMx_t* TIM);
+uint32_t GetTIM_CCR2Value(GP_TIMx_t* TIM);
+uint32_t GetTIM_CCR3Value(GP_TIMx_t* TIM);
+uint32_t GetTIM_CCR4Value(GP_TIMx_t* TIM);
+
+void SetTIM_ARRValue(GP_TIMx_t* TIM, uint32_t v);
+void SetTIM_CCR1Value(GP_TIMx_t* TIM, uint32_t v);
+void SetTIM_CCR2Value(GP_TIMx_t* TIM, uint32_t v);
+void SetTIM_CCR3Value(GP_TIMx_t* TIM, uint32_t v);
+void SetTIM_CCR4Value(GP_TIMx_t* TIM, uint32_t v);
+
+//define interrupt bits
+#define TIM_DIER_UIE 0
+#define TIM_DIER_CC1IE 1
+#define TIM_DIER_CC2IE 2
+#define TIM_DIER_CC3IE 3
+#define TIM_DIER_CC4IE 4
+#define TIM_DIER_TIE 6
+#define TIM_DIER_UDE 8
+#define TIM_DIER_CC1DE 9
+#define TIM_DIER_CC2DE 10
+#define TIM_DIER_CC3DE 11
+#define TIM_DIER_CC4DE 12
+#define TIM_DIER_TDE 14
+//define status flags
+#define TIM_SR_UIF 0
+#define TIM_SR_CC1IF 1
+#define TIM_SR_CC2IF 2
+#define TIM_SR_CC3IF 3
+#define TIM_SR_CC4IF 4
+#define TIM_SR_TIF 6
+#define TIM_SR_CC1OF 9
+#define TIM_SR_CC2OF 10
+#define TIM_SR_CC3OF 11
+#define TIM_SR_CC4OF 12
+//define CCER BITS
+#define TIM_CCER_CC1E 0
+#define TIM_CCER_CC1P 1
+#define TIM_CCER_CC1NP 3
+#define TIM_CCER_CC2E 4
+#define TIM_CCER_CC2P 5
+#define TIM_CCER_CC2NP 7
+#define TIM_CCER_CC3E 8
+#define TIM_CCER_CC3P 9
+#define TIM_CCER_CC3NP 11
+#define TIM_CCER_CC4E 12
+#define TIM_CCER_CC4P 13
+#define TIM_CCER_CC4NP 15
+
 
 /**********************************************************
 
