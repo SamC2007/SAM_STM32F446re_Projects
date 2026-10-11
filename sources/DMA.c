@@ -26,35 +26,41 @@ void DMA_Init(DMAx_Handler_t* DMA){
 
     if(DMA->DMAx_Config.DMA_STREAM == DMA_STREAM_0){
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S0FCR |= (1 << 2);
             DMA->DMAx->S0FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
-            DMA->DMAx->S0CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
 
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
         tempreg |= (DMA->DMAx_Config.DMA_MEM_BURST << DMA_CR_MBURST);
         tempreg |= (DMA->DMAx_Config.DMA_PERI_BURST << DMA_CR_PBURST);
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
 
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
+
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1  << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1  << DMA_CR_PINC);
+        }
 
 
        DMA->DMAx->S0CR |= tempreg;
     }else if(DMA->DMAx_Config.DMA_STREAM == DMA_STREAM_1){
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S1FCR |= (1 << 2);
             DMA->DMAx->S1FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
 
-            DMA->DMAx->S1CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
-
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
@@ -63,22 +69,28 @@ void DMA_Init(DMAx_Handler_t* DMA){
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
 
 
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
-
+ 
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1  << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1  << DMA_CR_PINC);
+        }
 
         DMA->DMAx->S1CR |= tempreg;
     }else if(DMA->DMAx_Config.DMA_STREAM == DMA_STREAM_2){
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S2FCR |= (1 << 2);
             DMA->DMAx->S2FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
 
-            DMA->DMAx->S2CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
 
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
@@ -87,21 +99,28 @@ void DMA_Init(DMAx_Handler_t* DMA){
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
 
 
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
+
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1 << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1 << DMA_CR_PINC);
+        }
 
         DMA->DMAx->S2CR |= tempreg;
     }else if(DMA->DMAx_Config.DMA_STREAM == DMA_STREAM_3){
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S3FCR |= (1 << 2);
             DMA->DMAx->S3FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
 
-            DMA->DMAx->S3CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
 
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
@@ -110,21 +129,28 @@ void DMA_Init(DMAx_Handler_t* DMA){
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
 
 
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
+
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1 << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1 << DMA_CR_PINC);
+        }
 
         DMA->DMAx->S3CR |= tempreg;
     }else if(DMA->DMAx_Config.DMA_STREAM == DMA_STREAM_4){
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S4FCR |= (1 << 2);
             DMA->DMAx->S4FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
 
-            DMA->DMAx->S4CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
 
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
@@ -132,21 +158,28 @@ void DMA_Init(DMAx_Handler_t* DMA){
         tempreg |= (DMA->DMAx_Config.DMA_PERI_BURST << DMA_CR_PBURST);
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
 
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
+
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1  << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1 << DMA_CR_PINC);
+        }
 
         DMA->DMAx->S4CR |= tempreg;
     }else if(DMA->DMAx_Config.DMA_STREAM == DMA_STREAM_5){
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S5FCR |= (1 << 2);
             DMA->DMAx->S5FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
 
-            DMA->DMAx->S5CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
 
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
@@ -154,22 +187,28 @@ void DMA_Init(DMAx_Handler_t* DMA){
         tempreg |= (DMA->DMAx_Config.DMA_PERI_BURST << DMA_CR_PBURST);
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
  
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
 
-      
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1  << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1 << DMA_CR_PINC);
+        }
+
         DMA->DMAx->S5CR |= tempreg;
     }else if(DMA->DMAx_Config.DMA_STREAM == DMA_STREAM_6){
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S6FCR |= (1 << 2);
             DMA->DMAx->S6FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
 
-            DMA->DMAx->S6CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
 
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
@@ -177,21 +216,27 @@ void DMA_Init(DMAx_Handler_t* DMA){
         tempreg |= (DMA->DMAx_Config.DMA_PERI_BURST << DMA_CR_PBURST);
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
  
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
+
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1 << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1 << DMA_CR_PINC);
+        }
 
        DMA->DMAx->S6CR |= tempreg;
     }else{
 
-        if(DMA->DMAx_Config.DMA_MODE != DIRECT_MODE_ENABLE){
+        if(DMA->DMAx_Config.DMA_DIRECT_MODE != DIRECT_MODE_ENABLE){
             DMA->DMAx->S7FCR |= (1 << 2);
             DMA->DMAx->S7FCR |= (DMA->DMAx_Config.DMA_FIFO_THR << 0);
 
-            DMA->DMAx->S7CR  |= (1 << DMA->DMAx_Config.DMA_MODE);
         }
-
+        tempreg  |= (1 << DMA->DMAx_Config.DMA_MODE);
         tempreg |= (DMA->DMAx_Config.DMA_STREAM_PRIORITY << DMA_CR_PL);
         tempreg |= (DMA->DMAx_Config.DMA_CHANNEL << DMA_CR_CHSEL);
         tempreg |= (DMA->DMAx_Config.DMA_DATA_DIR << DMA_CR_DIR);
@@ -199,10 +244,19 @@ void DMA_Init(DMAx_Handler_t* DMA){
         tempreg |= (DMA->DMAx_Config.DMA_PERI_BURST << DMA_CR_PBURST);
         tempreg |= (DMA->DMAx_Config.DMA_PERI_FLOW_CONT << DMA_CR_PFCTRL);
 
-        tempreg |= (DMA->DMAx_Config.DMA_MEM_INCREMENT << DMA_CR_MINC);
         tempreg |= (DMA->DMAx_Config.DMA_MSIZE << DMA_CR_MSIZE);
-        tempreg |= (DMA->DMAx_Config.DMA_PERI_INCREMENT  << DMA_CR_PINC);
         tempreg |= (DMA->DMAx_Config.DMA_PSIZE << DMA_CR_PSIZE);
+
+        if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY){
+            tempreg |= (1 << DMA_CR_MINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == PERI){
+            tempreg |= (1 << DMA_CR_PINC);
+        }else if(DMA->DMAx_Config.DMA_INCREMENT == MEMORY_AND_PERI){
+            tempreg |= (1 << DMA_CR_MINC);
+            tempreg |= (1 << DMA_CR_PINC);
+        }
+
+
        DMA->DMAx->S7CR |= tempreg;
     }
 }

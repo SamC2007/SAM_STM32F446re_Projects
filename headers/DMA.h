@@ -39,7 +39,7 @@
 #define INCR8 2
 #define INCR16 3
 
-#define DMA_CIRC 8
+#define CIRC_MODE 8
 #define DMA_DBM 18
 
 #define DMA_FLOW_CONTROLLER 0
@@ -57,21 +57,26 @@
 #define DMA_3QUARTERS_FIFO 2
 #define DMA_FULL_FIFO 3
 
+#define INCREMENT_NONE 0
+#define MEMORY 1
+#define PERI 2
+#define MEMORY_AND_PERI 3
+
 
 typedef struct{
+    uint8_t DMA_MODE;
+    uint8_t DMA_DIRECT_MODE;
     uint8_t DMA_STREAM;
     uint8_t DMA_CHANNEL;
     uint8_t DMA_STREAM_PRIORITY;
     uint8_t DMA_DATA_DIR;
-    uint8_t DMA_MEM_BURST;
     uint8_t DMA_PERI_BURST;
-    uint8_t DMA_MODE;
+    uint8_t DMA_MEM_BURST;
     uint8_t DMA_PERI_FLOW_CONT;
     uint8_t DMA_MSIZE;
     uint8_t DMA_PSIZE;
     uint8_t DMA_FIFO_THR;
-    uint8_t DMA_MEM_INCREMENT;
-    uint8_t DMA_PERI_INCREMENT;
+    uint8_t DMA_INCREMENT;
 }DMAx_Config_t;
 
 typedef struct{
