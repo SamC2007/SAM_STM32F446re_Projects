@@ -41,8 +41,7 @@ void DMA_init(){
     pDMA2.DMAx_Config.DMA_MSIZE = DMA_SIZE_HWORD;
     pDMA2.DMAx_Config.DMA_PSIZE = DMA_SIZE_HWORD;
 
-    pDMA2.DMAx_Config.DMA_MEM_INCREMENT = ENABLE;
-    pDMA2.DMAx_Config.DMA_PERI_INCREMENT = DISABLE;
+    pDMA2.DMAx_Config.DMA_INCREMENT = MEMORY;
 
     DMA_Init(&pDMA2);
 }
